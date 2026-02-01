@@ -1,0 +1,268 @@
+@import "tailwindcss";
+
+@theme {
+  --color-emerald: #10b981;
+  --color-teal: #14b8a6;
+  --color-cyan: #06b6d4;
+  --color-gold: #f59e0b;
+  --color-navy: #0f172a;
+  --color-charcoal: #1e293b;
+
+  --radius-pill: 9999px;
+  --radius-glass: 24px;
+  --radius-card: 32px;
+}
+
+:root {
+  --background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --foreground: #f1f5f9;
+}
+
+body {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  background-attachment: fixed;
+  color: var(--foreground);
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.01em;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Global Cursor Styles */
+button,
+a,
+[role="button"],
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+.cursor-pointer {
+  cursor: pointer;
+}
+
+button:disabled,
+[disabled] {
+  cursor: not-allowed;
+}
+
+@layer utilities {
+
+  /* Liquid Glass Background */
+  .liquid-bg {
+    position: relative;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  }
+
+  .liquid-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(16, 185, 129, 0.12) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(20, 184, 166, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 90% 70%, rgba(16, 185, 129, 0.06) 0%, transparent 50%);
+    filter: blur(80px);
+    opacity: 0.6;
+    animation: liquidFlow 25s ease-in-out infinite;
+  }
+
+  @keyframes liquidFlow {
+
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+      opacity: 0.6;
+    }
+
+    33% {
+      transform: translate(20px, -20px) scale(1.05);
+      opacity: 0.7;
+    }
+
+    66% {
+      transform: translate(-15px, 15px) scale(0.98);
+      opacity: 0.5;
+    }
+  }
+
+  /* Premium Liquid Glass Morphism */
+  .liquid-glass {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(30px) saturate(150%);
+    -webkit-backdrop-filter: blur(30px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .liquid-glass-hover {
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .liquid-glass-hover:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(16, 185, 129, 0.2);
+    box-shadow:
+      0 16px 48px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 0 0 1px rgba(16, 185, 129, 0.15);
+    transform: translateY(-4px) scale(1.01);
+  }
+
+  /* Frosted Glass Card */
+  .frosted-glass {
+    background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.04) 0%,
+        rgba(255, 255, 255, 0.01) 100%);
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      0 16px 40px rgba(0, 0, 0, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  /* Liquid Glow Effect */
+  .liquid-glow {
+    position: relative;
+  }
+
+  .liquid-glow::after {
+    content: '';
+    position: absolute;
+    inset: -15px;
+    border-radius: inherit;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.25), transparent 70%);
+    opacity: 0;
+    filter: blur(15px);
+    transition: opacity 0.5s ease;
+    z-index: -1;
+  }
+
+  .liquid-glow:hover::after {
+    opacity: 1;
+  }
+
+  /* Gold Premium Glow */
+  .gold-glow {
+    box-shadow:
+      0 8px 24px rgba(245, 158, 11, 0.25),
+      inset 0 1px 0 rgba(245, 158, 11, 0.15);
+  }
+
+  .gold-glow:hover {
+    box-shadow:
+      0 12px 32px rgba(245, 158, 11, 0.35),
+      inset 0 1px 0 rgba(245, 158, 11, 0.25);
+    transform: translateY(-2px);
+  }
+
+  /* Liquid Ripple Animation */
+  .liquid-ripple {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .liquid-ripple::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2), transparent);
+    transform: translate(-50%, -50%);
+    transition: width 0.5s ease, height 0.5s ease;
+  }
+
+  .liquid-ripple:active::before {
+    width: 200px;
+    height: 200px;
+  }
+
+  /* Shimmer Liquid Effect */
+  .liquid-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .liquid-shimmer::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.08),
+        transparent);
+    transform: rotate(45deg);
+    animation: shimmerFlow 4s infinite;
+  }
+
+  @keyframes shimmerFlow {
+    0% {
+      transform: translateX(-100%) rotate(45deg);
+    }
+
+    100% {
+      transform: translateX(100%) rotate(45deg);
+    }
+  }
+
+  /* Floating Glass Effect */
+  .floating-glass {
+    animation: floatGlass 8s ease-in-out infinite;
+  }
+
+  @keyframes floatGlass {
+
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  /* Text Gradient */
+  .text-liquid-gradient {
+    background: linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+  }
+
+  .text-gold-gradient {
+    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.01);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.3), rgba(20, 184, 166, 0.3));
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.5), rgba(20, 184, 166, 0.5));
+}
