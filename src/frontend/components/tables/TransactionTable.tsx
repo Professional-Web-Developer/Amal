@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Badge from '@/frontend/elements/badges/Badge';
-import { MoreVertical, Sparkles } from 'lucide-react';
+import { MoreVertical, Sparkles, Repeat } from 'lucide-react';
 
 export interface Transaction {
     id: string | number;
@@ -13,6 +13,7 @@ export interface Transaction {
     status: 'completed' | 'pending' | 'failed';
     type: 'income' | 'expense';
     icon?: string;
+    is_recurring?: boolean;
 }
 
 interface TransactionTableProps {
@@ -54,6 +55,7 @@ export default function TransactionTable({ transactions }: TransactionTableProps
                                             <p className="text-xs text-[#86868b] font-semibold uppercase tracking-wider mt-1 flex items-center gap-1.5">
                                                 {tx.type === 'income' && <Sparkles className="w-3 h-3 text-[#34C759]" />}
                                                 {tx.type}
+                                                {tx.is_recurring && <Repeat className="w-3 h-3 text-emerald-500" />}
                                             </p>
                                         </div>
                                     </div>

@@ -1,77 +1,76 @@
 import { createClient } from '@/utils/supabase/server';
+import { Liability, LiabilityType } from '@/types/finance';
 
-export interface CreateTransactionDTO {
+export interface CreateLiabilityDTO {
+    type: LiabilityType;
     name: string;
-    amount: number;
-    category: string;
-    type: 'income' | 'expense';
-    account_id?: string;
-    date?: string;
+    outstanding_amount: number;
+    original_amount: number;
+    interest_rate: number;
+    emi_amount: number;
+    due_date: string;
+    start_date: string;
+    end_date?: string;
+    linked_account_id?: string;
     is_recurring?: boolean;
+    notes?: string;
 }
 
-export class TransactionService {
-    static async getAllTransactions() {
+export class LiabilityService {
+    static async getAllLiabilities() {
         const supabase = await createClient();
-        const { data, error } = await supabase
-            .from('transactions')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-        if (error) throw new Error(error.message);
-        return data || [];
-    }
-
-    static async getTransactionById(id: string) {
-        const supabase = await createClient();
-        const { data, error } = await supabase
-            .from('transactions')
-            .select('*')
-            .eq('id', id)
-            .single();
-
-        if (error) throw new Error(error.message);
-        return data;
-    }
-
-    static async createTransaction(dto: CreateTransactionDTO) {
-        const supabase = await createClient();
-
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error("Unauthorized");
 
         const { data, error } = await supabase
-            .from('transactions')
+            .from('liabilities')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
+
+        if (error) throw new Error(error.message);
+        return (data || []) as Liability[];
+    }
+
+    static async createLiability(dto: CreateLiabilityDTO) {
+        const supabase = await createClient();
+        
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("Unauthorized");
+
+        const { data, error } = await supabase
+            .from('liabilities')
             .insert([{ ...dto, user_id: user.id }])
             .select();
 
         if (error) throw new Error(error.message);
-        return data ? data[0] : null;
+        return data ? data[0] as Liability : null;
     }
 
-    static async updateTransaction(id: string, dto: Partial<CreateTransactionDTO>) {
+    static async updateLiability(id: string, dto: Partial<CreateLiabilityDTO>) {
         const supabase = await createClient();
+        
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error("Unauthorized");
 
         const { data, error } = await supabase
-            .from('transactions')
+            .from('liabilities')
             .update(dto)
             .eq('id', id)
             .eq('user_id', user.id)
             .select();
 
         if (error) throw new Error(error.message);
-        return data ? data[0] : null;
+        return data ? data[0] as Liability : null;
     }
 
-    static async deleteTransaction(id: string) {
+    static async deleteLiability(id: string) {
         const supabase = await createClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error("Unauthorized");
 
         const { error } = await supabase
-            .from('transactions')
+            .from('liabilities')
             .delete()
             .eq('id', id)
             .eq('user_id', user.id);

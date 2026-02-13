@@ -9,7 +9,12 @@ import {
     Settings,
     LogOut,
     Menu,
-    X
+    X,
+    TrendingUp,
+    TrendingDown,
+    Target,
+    Sparkles,
+    Heart
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -27,6 +32,11 @@ const navItems = [
     { icon: Wallet, label: 'Accounts', href: '/accounts' },
     { icon: ArrowUpRight, label: 'Transactions', href: '/transactions' },
     { icon: PieChart, label: 'Analytics', href: '/analytics' },
+    { icon: TrendingUp, label: 'Assets', href: '/assets' },
+    { icon: TrendingDown, label: 'Liabilities', href: '/liabilities' },
+    { icon: Target, label: 'Goals', href: '/goals' },
+    { icon: Sparkles, label: 'Projections', href: '/projections' },
+    { icon: Heart, label: 'Health Score', href: '/health' },
 ];
 
 export default function Sidebar() {
@@ -62,11 +72,11 @@ export default function Sidebar() {
             <div className={cn(
                 "w-72 h-[calc(100vh-2rem)] frosted-glass rounded-[2rem] flex flex-col p-6 z-50 shadow-2xl border border-white/10",
                 "fixed left-4 top-4",
-                "lg:block",
+                "lg:block overflow-y-auto scrollbar-hide",
                 isMobileMenuOpen ? "block" : "hidden lg:block"
             )}>
                 {/* Logo */}
-                <div className="flex items-center gap-4 mb-12 px-2 mt-4">
+                <div className="flex items-center gap-4 mb-8 px-2 mt-4 flex-shrink-0">
                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 backdrop-blur-sm p-2 shadow-lg shadow-emerald-500/20 floating-glass border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
                         <AmalLogo className="w-8 h-8" />
                     </div>
@@ -77,7 +87,7 @@ export default function Sidebar() {
                 </div>
 
                 {/* Navigation */}
-                <nav className="flex-1 space-y-2">
+                <nav className="flex-1 space-y-1.5 overflow-y-auto pr-2 custom-scrollbar">
                     {navItems.map((item) => {
                         const isActive = pathname === item.href;
                         return (
@@ -86,7 +96,7 @@ export default function Sidebar() {
                                 href={item.href}
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className={cn(
-                                    "flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden",
+                                    "flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 group relative overflow-hidden",
                                     isActive
                                         ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/20"
                                         : "text-slate-400 hover:text-slate-100 hover:bg-white/5"
@@ -106,18 +116,18 @@ export default function Sidebar() {
                 </nav>
 
                 {/* Bottom Actions */}
-                <div className="mt-auto space-y-2 pt-6 border-t border-white/5">
+                <div className="mt-auto space-y-1.5 pt-4 border-t border-white/5 flex-shrink-0">
                     <Link
                         href="/settings"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 hover:text-slate-100 hover:bg-white/5 transition-all duration-300 group"
+                        className="flex items-center gap-3 px-4 py-2.5 rounded-2xl text-slate-400 hover:text-slate-100 hover:bg-white/5 transition-all duration-300 group"
                     >
                         <Settings className="w-5 h-5 group-hover:rotate-45 transition-transform duration-500" />
                         <span className="font-semibold text-sm tracking-tight">Settings</span>
                     </Link>
                     <button
                         onClick={handleLogout}
-                        className="flex items-center gap-3 px-4 py-3 rounded-2xl text-red-400 hover:bg-red-500/10 w-full transition-all duration-300 active:scale-98 group cursor-pointer"
+                        className="flex items-center gap-3 px-4 py-2.5 rounded-2xl text-red-400 hover:bg-red-500/10 w-full transition-all duration-300 active:scale-98 group cursor-pointer"
                     >
                         <LogOut className="w-5 h-5" />
                         <span className="font-semibold text-sm tracking-tight">Logout</span>

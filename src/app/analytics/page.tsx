@@ -15,54 +15,71 @@ import SummaryCard from '@/frontend/components/cards/SummaryCard';
 import DashboardChart from '@/frontend/components/charts/DashboardChart';
 import { getTransactions } from '@/app/actions/transactions';
 import { getAccounts } from '@/app/actions/accounts';
+import { getAssets } from '@/app/actions/assets';
+import { getLiabilities } from '@/app/actions/liabilities';
+import { getGoals } from '@/app/actions/goals';
+import {
+    calculateFinancialSummary,
+    calculateExpenseBreakdown,
+    calculateIncomeVsExpense,
+    formatCurrency,
+    formatCurrencyFull
+} from '@/lib/financeEngine';
 
 export default function AnalyticsPage() {
-    const [transactions, setTransactions] = useState<any[]>([]);
-    const [accounts, setAccounts] = useState<any[]>([]);
+    const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            const [txData, accData] = await Promise.all([
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [txs, accs, assets, libs, goals] = await Promise.all([
                 getTransactions(),
-                getAccounts()
+                getAccounts(),
+                getAssets(),
+                getLiabilities(),
+                getGoals()
             ]);
-            setTransactions(txData);
-            setAccounts(accData);
+
+            const summary = calculateFinancialSummary(assets, libs, [], [], txs);
+            const expenseBreakdown = calculateExpenseBreakdown([], txs);
+            const incomeVsExpense = calculateIncomeVsExpense([], [], txs);
+
+            setData({
+                summary,
+                expenseBreakdown,
+                incomeVsExpense,
+                transactions: txs
+            });
+        } catch (error) {
+            console.error(error);
+        } finally {
             setLoading(false);
-        };
+        }
+    };
+
+    useEffect(() => {
         fetchData();
     }, []);
 
-    const totalIncome = transactions
-        .filter(tx => tx.type === 'income')
-        .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
+    if (loading || !data) {
+        return (
+            <div className="min-h-screen px-4 sm:px-6 lg:pl-80 lg:pr-8 py-6 lg:py-8 flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 animate-pulse">Analyzing Wealth Patterns</p>
+                </div>
+            </div>
+        );
+    }
 
-    const totalExpenses = transactions
-        .filter(tx => tx.type === 'expense')
-        .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
+    const { summary, expenseBreakdown, incomeVsExpense } = data;
 
-    const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0;
-
-    // Categories Breakdown (simplified)
-    const categoryBreakdown = transactions
-        .filter(tx => tx.type === 'expense')
-        .reduce((acc: any, tx) => {
-            acc[tx.category] = (acc[tx.category] || 0) + Math.abs(parseFloat(tx.amount));
-            return acc;
-        }, {});
-
-    const sortedCategories = Object.entries(categoryBreakdown)
-        .sort(([, a]: any, [, b]: any) => b - a)
-        .slice(0, 5);
-
-    const chartData = [
-        { name: 'Week 1', value: 1200 },
-        { name: 'Week 2', value: 1900 },
-        { name: 'Week 3', value: 1500 },
-        { name: 'Week 4', value: totalIncome || 2400 },
-    ];
+    // Use monthly income trend for the chart
+    const chartData = incomeVsExpense.map((item: any) => ({
+        name: item.month,
+        value: item.income
+    }));
 
     return (
         <div className="min-h-screen px-4 sm:px-6 lg:pl-80 lg:pr-8 py-6 lg:py-8">
@@ -72,9 +89,9 @@ export default function AnalyticsPage() {
                     <div>
                         <div className="flex items-center gap-2 mb-2 lg:mb-3">
                             <PieChart className="w-4 h-4 lg:w-5 lg:h-5 text-emerald-400" />
-                            <span className="text-xs lg:text-sm font-semibold text-slate-400 tracking-wide">Advanced Insights</span>
+                            <span className="text-xs lg:text-sm font-semibold text-slate-400 tracking-wide uppercase">Advanced Insights</span>
                         </div>
-                        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-liquid-gradient tracking-tight">Analytics</h1>
+                        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-liquid-gradient tracking-tight">Analytics</h1>
                         <p className="text-slate-400 mt-2 lg:mt-3 font-medium text-sm lg:text-base">Deep dive into your financial habits and trends</p>
                     </div>
                 </div>
@@ -83,31 +100,31 @@ export default function AnalyticsPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                     <SummaryCard
                         title="Savings Rate"
-                        value={`${savingsRate.toFixed(1)}%`}
+                        value={`${summary.savingsRate}%`}
                         icon={Target}
                         variant="balance"
-                        subtitle="Current month"
+                        subtitle="Current Month"
                     />
                     <SummaryCard
-                        title="Total Income"
-                        value={`$${totalIncome.toLocaleString()}`}
+                        title="Monthly Income"
+                        value={formatCurrencyFull(summary.monthlyIncome)}
                         icon={TrendingUp}
                         variant="income"
-                        subtitle="Growth tracking"
+                        subtitle="Synced Flow"
                     />
                     <SummaryCard
-                        title="Total Expenses"
-                        value={`$${totalExpenses.toLocaleString()}`}
+                        title="Monthly Expenses"
+                        value={formatCurrencyFull(summary.monthlyExpenses)}
                         icon={TrendingDown}
                         variant="expense"
-                        subtitle="Expense control"
+                        subtitle="Capital Outflow"
                     />
                     <SummaryCard
-                        title="Projected"
-                        value={`$${(totalIncome * 1.1).toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
+                        title="Debt-to-Income"
+                        value={`${summary.debtToIncomeRatio}%`}
                         icon={Sparkles}
                         variant="balance"
-                        subtitle="Next month est."
+                        subtitle="Liability Health"
                     />
                 </div>
 
@@ -116,8 +133,8 @@ export default function AnalyticsPage() {
                     <div className="lg:col-span-2 frosted-glass p-6 lg:p-8 rounded-[2rem] lg:rounded-[2.5rem] liquid-glass-hover">
                         <div className="flex items-center justify-between mb-8">
                             <div>
-                                <h3 className="text-xl lg:text-2xl font-bold text-slate-100 tracking-tight">Financial Performance</h3>
-                                <p className="text-xs lg:text-sm text-slate-400 mt-1 font-medium">Income vs Time Analysis</p>
+                                <h3 className="text-xl lg:text-2xl font-black text-slate-100 tracking-tight uppercase">Financial Performance</h3>
+                                <p className="text-xs lg:text-sm text-slate-500 mt-1 font-bold uppercase tracking-wider">Historical Income Trend</p>
                             </div>
                             <BarChart3 className="w-6 h-6 text-emerald-500 opacity-50" />
                         </div>
@@ -127,32 +144,31 @@ export default function AnalyticsPage() {
                     {/* Category Breakdown */}
                     <div className="frosted-glass p-6 lg:p-8 rounded-[2rem] lg:rounded-[2.5rem] liquid-glass-hover">
                         <div className="flex items-center justify-between mb-8">
-                            <h3 className="text-xl lg:text-2xl font-bold text-slate-100 tracking-tight">Top Categories</h3>
+                            <h3 className="text-xl lg:text-2xl font-black text-slate-100 tracking-tight uppercase">Top Categories</h3>
                             <CreditCard className="w-5 h-5 text-slate-500" />
                         </div>
                         <div className="space-y-6">
-                            {loading ? (
-                                <div className="py-20 flex flex-col items-center justify-center">
-                                    <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4" />
-                                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Processing</p>
+                            {expenseBreakdown.length === 0 ? (
+                                <div className="py-20 flex flex-col items-center justify-center opacity-40">
+                                    <Target className="w-10 h-10 mb-4" />
+                                    <p className="text-xs font-black uppercase tracking-widest text-slate-500">No Expense Mapping</p>
                                 </div>
-                            ) : sortedCategories.length === 0 ? (
-                                <p className="text-center text-slate-500 py-10">No expense data found</p>
-                            ) : sortedCategories.map(([category, amount]: any, index) => (
-                                <div key={category} className="space-y-2">
+                            ) : expenseBreakdown.slice(0, 5).map((item: any) => (
+                                <div key={item.category} className="space-y-2">
                                     <div className="flex justify-between items-center text-sm">
-                                        <span className="font-bold text-slate-300">{category}</span>
-                                        <span className="font-bold text-emerald-400">${amount.toLocaleString()}</span>
+                                        <span className="font-bold text-slate-300 uppercase tracking-tight">{item.category}</span>
+                                        <span className="font-black text-emerald-400">{formatCurrency(item.amount)}</span>
                                     </div>
                                     <div className="h-2 w-full bg-slate-900/50 rounded-full overflow-hidden border border-white/5">
                                         <div
-                                            className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"
+                                            className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.3)]"
                                             style={{
-                                                width: `${(amount / totalExpenses) * 100}%`,
+                                                width: `${item.percentage}%`,
                                                 transition: 'width 1s ease-out'
                                             }}
                                         />
                                     </div>
+                                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">{item.percentage}% of total spend</p>
                                 </div>
                             ))}
                         </div>

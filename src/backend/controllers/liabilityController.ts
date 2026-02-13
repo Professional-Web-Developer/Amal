@@ -1,39 +1,39 @@
 import { NextResponse } from 'next/server';
-import { AccountService } from '../services/accountService';
+import { LiabilityService, CreateLiabilityDTO } from '../services/liabilityService';
 
-export class AccountController {
-    static async getAccounts() {
+export class LiabilityController {
+    static async getLiabilities() {
         try {
-            const accounts = await AccountService.getAllAccounts();
-            return NextResponse.json({ success: true, data: accounts });
+            const liabilities = await LiabilityService.getAllLiabilities();
+            return NextResponse.json({ success: true, data: liabilities });
         } catch (error: any) {
             return NextResponse.json({ success: false, error: error.message }, { status: 500 });
         }
     }
 
-    static async createAccount(req: Request) {
+    static async createLiability(req: Request) {
         try {
             const body = await req.json();
-            const account = await AccountService.createAccount(body);
-            return NextResponse.json({ success: true, data: account });
+            const liability = await LiabilityService.createLiability(body);
+            return NextResponse.json({ success: true, data: liability });
         } catch (error: any) {
             return NextResponse.json({ success: false, error: error.message }, { status: 500 });
         }
     }
 
-    static async updateAccount(id: string, req: Request) {
+    static async updateLiability(id: string, req: Request) {
         try {
             const body = await req.json();
-            const account = await AccountService.updateAccount(id, body);
-            return NextResponse.json({ success: true, data: account });
+            const liability = await LiabilityService.updateLiability(id, body);
+            return NextResponse.json({ success: true, data: liability });
         } catch (error: any) {
             return NextResponse.json({ success: false, error: error.message }, { status: 500 });
         }
     }
 
-    static async deleteAccount(id: string) {
+    static async deleteLiability(id: string) {
         try {
-            await AccountService.deleteAccount(id);
+            await LiabilityService.deleteLiability(id);
             return NextResponse.json({ success: true });
         } catch (error: any) {
             return NextResponse.json({ success: false, error: error.message }, { status: 500 });

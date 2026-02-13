@@ -22,7 +22,6 @@ export class AccountService {
     static async createAccount(dto: CreateAccountDTO) {
         const supabase = await createClient();
         
-        // Get the current user
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error("Unauthorized");
 
@@ -33,5 +32,36 @@ export class AccountService {
 
         if (error) throw new Error(error.message);
         return data ? data[0] : null;
+    }
+
+    static async updateAccount(id: string, dto: Partial<CreateAccountDTO>) {
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("Unauthorized");
+
+        const { data, error } = await supabase
+            .from('accounts')
+            .update(dto)
+            .eq('id', id)
+            .eq('user_id', user.id)
+            .select();
+
+        if (error) throw new Error(error.message);
+        return data ? data[0] : null;
+    }
+
+    static async deleteAccount(id: string) {
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("Unauthorized");
+
+        const { error } = await supabase
+            .from('accounts')
+            .delete()
+            .eq('id', id)
+            .eq('user_id', user.id);
+
+        if (error) throw new Error(error.message);
+        return true;
     }
 }

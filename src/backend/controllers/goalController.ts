@@ -1,39 +1,39 @@
 import { NextResponse } from 'next/server';
-import { AccountService } from '../services/accountService';
+import { GoalService, CreateGoalDTO } from '../services/goalService';
 
-export class AccountController {
-    static async getAccounts() {
+export class GoalController {
+    static async getGoals() {
         try {
-            const accounts = await AccountService.getAllAccounts();
-            return NextResponse.json({ success: true, data: accounts });
+            const goals = await GoalService.getAllGoals();
+            return NextResponse.json({ success: true, data: goals });
         } catch (error: any) {
             return NextResponse.json({ success: false, error: error.message }, { status: 500 });
         }
     }
 
-    static async createAccount(req: Request) {
+    static async createGoal(req: Request) {
         try {
             const body = await req.json();
-            const account = await AccountService.createAccount(body);
-            return NextResponse.json({ success: true, data: account });
+            const goal = await GoalService.createGoal(body);
+            return NextResponse.json({ success: true, data: goal });
         } catch (error: any) {
             return NextResponse.json({ success: false, error: error.message }, { status: 500 });
         }
     }
 
-    static async updateAccount(id: string, req: Request) {
+    static async updateGoal(id: string, req: Request) {
         try {
             const body = await req.json();
-            const account = await AccountService.updateAccount(id, body);
-            return NextResponse.json({ success: true, data: account });
+            const goal = await GoalService.updateGoal(id, body);
+            return NextResponse.json({ success: true, data: goal });
         } catch (error: any) {
             return NextResponse.json({ success: false, error: error.message }, { status: 500 });
         }
     }
 
-    static async deleteAccount(id: string) {
+    static async deleteGoal(id: string) {
         try {
-            await AccountService.deleteAccount(id);
+            await GoalService.deleteGoal(id);
             return NextResponse.json({ success: true });
         } catch (error: any) {
             return NextResponse.json({ success: false, error: error.message }, { status: 500 });

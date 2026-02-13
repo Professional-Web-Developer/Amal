@@ -1,39 +1,39 @@
 import { NextResponse } from 'next/server';
-import { AccountService } from '../services/accountService';
+import { AssetService, CreateAssetDTO } from '../services/assetService';
 
-export class AccountController {
-    static async getAccounts() {
+export class AssetController {
+    static async getAssets() {
         try {
-            const accounts = await AccountService.getAllAccounts();
-            return NextResponse.json({ success: true, data: accounts });
+            const assets = await AssetService.getAllAssets();
+            return NextResponse.json({ success: true, data: assets });
         } catch (error: any) {
             return NextResponse.json({ success: false, error: error.message }, { status: 500 });
         }
     }
 
-    static async createAccount(req: Request) {
+    static async createAsset(req: Request) {
         try {
             const body = await req.json();
-            const account = await AccountService.createAccount(body);
-            return NextResponse.json({ success: true, data: account });
+            const asset = await AssetService.createAsset(body);
+            return NextResponse.json({ success: true, data: asset });
         } catch (error: any) {
             return NextResponse.json({ success: false, error: error.message }, { status: 500 });
         }
     }
 
-    static async updateAccount(id: string, req: Request) {
+    static async updateAsset(id: string, req: Request) {
         try {
             const body = await req.json();
-            const account = await AccountService.updateAccount(id, body);
-            return NextResponse.json({ success: true, data: account });
+            const asset = await AssetService.updateAsset(id, body);
+            return NextResponse.json({ success: true, data: asset });
         } catch (error: any) {
             return NextResponse.json({ success: false, error: error.message }, { status: 500 });
         }
     }
 
-    static async deleteAccount(id: string) {
+    static async deleteAsset(id: string) {
         try {
-            await AccountService.deleteAccount(id);
+            await AssetService.deleteAsset(id);
             return NextResponse.json({ success: true });
         } catch (error: any) {
             return NextResponse.json({ success: false, error: error.message }, { status: 500 });

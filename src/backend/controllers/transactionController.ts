@@ -11,11 +11,39 @@ export class TransactionController {
         }
     }
 
+    static async getTransactionById(id: string) {
+        try {
+            const transaction = await TransactionService.getTransactionById(id);
+            return NextResponse.json({ success: true, data: transaction });
+        } catch (error: any) {
+            return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+        }
+    }
+
     static async createTransaction(req: Request) {
         try {
             const body = await req.json();
             const transaction = await TransactionService.createTransaction(body);
             return NextResponse.json({ success: true, data: transaction });
+        } catch (error: any) {
+            return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+        }
+    }
+
+    static async updateTransaction(id: string, req: Request) {
+        try {
+            const body = await req.json();
+            const transaction = await TransactionService.updateTransaction(id, body);
+            return NextResponse.json({ success: true, data: transaction });
+        } catch (error: any) {
+            return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+        }
+    }
+
+    static async deleteTransaction(id: string) {
+        try {
+            await TransactionService.deleteTransaction(id);
+            return NextResponse.json({ success: true });
         } catch (error: any) {
             return NextResponse.json({ success: false, error: error.message }, { status: 500 });
         }

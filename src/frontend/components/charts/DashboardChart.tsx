@@ -59,7 +59,7 @@ export default function DashboardChart({
                             fontWeight={600}
                             tickLine={false}
                             axisLine={false}
-                            tickFormatter={(value) => `$${value}`}
+                            tickFormatter={(value) => `₹${value >= 1000 ? (value / 1000).toFixed(1) + 'K' : value}`}
                         />
                         <Tooltip
                             contentStyle={{

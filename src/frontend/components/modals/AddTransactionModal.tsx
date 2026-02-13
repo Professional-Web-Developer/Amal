@@ -18,6 +18,8 @@ export default function AddTransactionModal({ isOpen, onClose }: AddTransactionM
         amount: '',
         category: '',
         type: 'expense' as 'income' | 'expense',
+        date: new Date().toISOString().split('T')[0],
+        is_recurring: false
     });
 
     if (!isOpen) return null;
@@ -32,10 +34,19 @@ export default function AddTransactionModal({ isOpen, onClose }: AddTransactionM
                 amount: parseFloat(formData.amount) || 0,
                 category: formData.category,
                 type: formData.type,
+                date: formData.date,
+                is_recurring: formData.is_recurring
             });
 
             if (result.success) {
-                setFormData({ name: '', amount: '', category: '', type: 'expense' });
+                setFormData({
+                    name: '',
+                    amount: '',
+                    category: '',
+                    type: 'expense',
+                    date: new Date().toISOString().split('T')[0],
+                    is_recurring: false
+                });
                 onClose();
             } else {
                 alert('Error: ' + result.error);
@@ -136,6 +147,24 @@ export default function AddTransactionModal({ isOpen, onClose }: AddTransactionM
                                     </div>
                                 </label>
                             </div>
+                        </div>
+
+                        <div className="pt-2">
+                            <label className="flex items-center gap-3 cursor-pointer group">
+                                <div className="relative">
+                                    <input
+                                        type="checkbox"
+                                        className="sr-only peer"
+                                        checked={formData.is_recurring}
+                                        onChange={(e) => setFormData({ ...formData, is_recurring: e.target.checked })}
+                                    />
+                                    <div className="w-10 h-5 bg-white/10 rounded-full peer peer-checked:bg-emerald-500/50 transition-all after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/40 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-5 peer-checked:after:bg-emerald-400" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-bold text-slate-300 group-hover:text-emerald-400 transition-colors uppercase tracking-tight">Set as Recurring</span>
+                                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Auto-mentions as debited every month</span>
+                                </div>
+                            </label>
                         </div>
                     </div>
 
