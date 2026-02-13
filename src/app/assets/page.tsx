@@ -6,7 +6,6 @@ import Button from '@/frontend/elements/buttons/Button';
 import Input from '@/frontend/elements/inputs/Input';
 import AssetLiabilityCard from '@/frontend/components/finance/AssetLiabilityCard';
 import AddAssetModal from '@/frontend/components/modals/AddAssetModal';
-import { getAssets } from '@/app/actions/assets';
 import { Asset } from '@/types/finance';
 import { formatCurrencyFull } from '@/lib/financeEngine';
 
@@ -19,14 +18,36 @@ export default function AssetsPage() {
 
     const fetchData = async () => {
         setLoading(true);
-        const data = await getAssets();
-        setAssets(data);
-        setLoading(false);
+        try {
+            const response = await fetch('/api/assets');
+            const result = await response.json();
+            if (result.success) {
+                setAssets(result.data);
+            }
+        } catch (error) {
+            console.error('Error fetching assets:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleEdit = (asset: any) => {
         setEditingAsset(asset);
         setIsModalOpen(true);
+    };
+
+    const handleDelete = async (id: string) => {
+        try {
+            const response = await fetch(`/api/assets/${id}`, { method: 'DELETE' });
+            const result = await response.json();
+            if (result.success) {
+                fetchData();
+            } else {
+                alert('Failed to delete asset: ' + (result.error || 'Unknown error'));
+            }
+        } catch (error: any) {
+            alert('Error deleting asset: ' + error.message);
+        }
     };
 
     const handleOpenAdd = () => {
@@ -108,6 +129,7 @@ export default function AssetsPage() {
                                 item={asset}
                                 type="asset"
                                 onEdit={handleEdit}
+                                onDelete={handleDelete}
                             />
                         ))}
                     </div>

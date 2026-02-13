@@ -13,15 +13,7 @@ import {
 } from 'lucide-react';
 import SummaryCard from '@/frontend/components/cards/SummaryCard';
 import DashboardChart from '@/frontend/components/charts/DashboardChart';
-import { getTransactions } from '@/app/actions/transactions';
-import { getAccounts } from '@/app/actions/accounts';
-import { getAssets } from '@/app/actions/assets';
-import { getLiabilities } from '@/app/actions/liabilities';
-import { getGoals } from '@/app/actions/goals';
 import {
-    calculateFinancialSummary,
-    calculateExpenseBreakdown,
-    calculateIncomeVsExpense,
     formatCurrency,
     formatCurrencyFull
 } from '@/lib/financeEngine';
@@ -33,24 +25,11 @@ export default function AnalyticsPage() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [txs, accs, assets, libs, goals] = await Promise.all([
-                getTransactions(),
-                getAccounts(),
-                getAssets(),
-                getLiabilities(),
-                getGoals()
-            ]);
-
-            const summary = calculateFinancialSummary(assets, libs, [], [], txs);
-            const expenseBreakdown = calculateExpenseBreakdown([], txs);
-            const incomeVsExpense = calculateIncomeVsExpense([], [], txs);
-
-            setData({
-                summary,
-                expenseBreakdown,
-                incomeVsExpense,
-                transactions: txs
-            });
+            const response = await fetch('/api/finance');
+            const result = await response.json();
+            if (result.success) {
+                setData(result.data);
+            }
         } catch (error) {
             console.error(error);
         } finally {

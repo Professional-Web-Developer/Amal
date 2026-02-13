@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { X, Type, Target, Calendar, Flag, FileText, Repeat } from 'lucide-react';
 import Button from '@/frontend/elements/buttons/Button';
 import Input from '@/frontend/elements/inputs/Input';
-import { createGoal, updateGoal } from '@/app/actions/goals';
 import { FinancialGoal, GoalCategory } from '@/types/finance';
 
 interface AddGoalModalProps {
@@ -84,9 +83,19 @@ export default function AddGoalModal({ isOpen, onClose, initialData }: AddGoalMo
                 notes: formData.notes,
             };
 
-            const result = initialData
-                ? await updateGoal(initialData.id, data)
-                : await createGoal(data);
+            const response = initialData
+                ? await fetch(`/api/goals/${initialData.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                })
+                : await fetch('/api/goals', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+            const result = await response.json();
 
             if (result.success) {
                 handleClose();

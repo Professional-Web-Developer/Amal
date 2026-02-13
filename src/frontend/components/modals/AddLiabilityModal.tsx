@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { X, Type, Tag, Calendar, Shield, CreditCard, FileText, Repeat } from 'lucide-react';
 import Button from '@/frontend/elements/buttons/Button';
 import Input from '@/frontend/elements/inputs/Input';
-import { createLiability, updateLiability } from '@/app/actions/liabilities';
 import { Liability, LiabilityType } from '@/types/finance';
 
 interface AddLiabilityModalProps {
@@ -86,9 +85,19 @@ export default function AddLiabilityModal({ isOpen, onClose, initialData }: AddL
                 notes: formData.notes,
             };
 
-            const result = initialData
-                ? await updateLiability(initialData.id, data)
-                : await createLiability(data);
+            const response = initialData
+                ? await fetch(`/api/liabilities/${initialData.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                })
+                : await fetch('/api/liabilities', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+            const result = await response.json();
 
             if (result.success) {
                 handleClose();

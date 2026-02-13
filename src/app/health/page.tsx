@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { Heart, Sparkles, TrendingUp, Shield, Zap, AlertTriangle, ArrowRight } from 'lucide-react';
 import HealthScoreWidget from '@/frontend/components/finance/HealthScoreWidget';
 import InsightCard from '@/frontend/components/finance/InsightCard';
-import { getComprehensiveFinanceData } from '@/app/actions/finance';
 import Button from '@/frontend/elements/buttons/Button';
 
 export default function HealthPage() {
@@ -13,9 +12,17 @@ export default function HealthPage() {
 
     const fetchData = async () => {
         setLoading(true);
-        const result = await getComprehensiveFinanceData();
-        setData(result);
-        setLoading(false);
+        try {
+            const response = await fetch('/api/finance');
+            const result = await response.json();
+            if (result.success) {
+                setData(result.data);
+            }
+        } catch (error) {
+            console.error('Error fetching health data:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {

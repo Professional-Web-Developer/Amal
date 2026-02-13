@@ -6,7 +6,6 @@ import Button from '@/frontend/elements/buttons/Button';
 import Input from '@/frontend/elements/inputs/Input';
 import TransactionTable from '@/frontend/components/tables/TransactionTable';
 import AddTransactionModal from '@/frontend/components/modals/AddTransactionModal';
-import { getTransactions } from '@/app/actions/transactions';
 
 export default function TransactionsPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,9 +15,31 @@ export default function TransactionsPage() {
 
     const fetchTransactions = async () => {
         setLoading(true);
-        const data = await getTransactions();
-        setTransactions(data);
-        setLoading(false);
+        try {
+            const response = await fetch('/api/transactions');
+            const result = await response.json();
+            if (result.success) {
+                setTransactions(result.data);
+            }
+        } catch (error) {
+            console.error('Error fetching transactions:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        try {
+            const response = await fetch(`/api/transactions/${id}`, { method: 'DELETE' });
+            const result = await response.json();
+            if (result.success) {
+                fetchTransactions();
+            } else {
+                alert('Failed to delete transaction: ' + (result.error || 'Unknown error'));
+            }
+        } catch (error: any) {
+            alert('Error deleting transaction: ' + error.message);
+        }
     };
 
     useEffect(() => {
@@ -84,7 +105,7 @@ export default function TransactionsPage() {
                     <div className="py-60 text-center text-white/10 font-black uppercase text-[11px] tracking-[0.4em] italic mb-20 animate-pulse">Syncing Ledger...</div>
                 ) : (
                     <div className="mb-20">
-                        <TransactionTable transactions={filteredTransactions} />
+                        <TransactionTable transactions={filteredTransactions} onDelete={handleDelete} />
                     </div>
                 )}
 

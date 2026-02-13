@@ -15,7 +15,8 @@ import {
   Activity,
   Layers,
   Layout,
-  Repeat
+  Repeat,
+  Trash2
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -27,7 +28,6 @@ import HealthScoreWidget from '@/frontend/components/finance/HealthScoreWidget';
 import GoalCard from '@/frontend/components/finance/GoalCard';
 import InsightCard from '@/frontend/components/finance/InsightCard';
 import RemindersWidget from '@/frontend/components/finance/RemindersWidget';
-import { getComprehensiveFinanceData } from '@/app/actions/finance';
 import { formatCurrency, formatCurrencyFull } from '@/lib/financeEngine';
 
 export default function Dashboard() {
@@ -39,12 +39,41 @@ export default function Dashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const result = await getComprehensiveFinanceData();
-      setData(result);
+      const response = await fetch('/api/finance');
+      const result = await response.json();
+      if (result.success) {
+        setData(result.data);
+      }
     } catch (error) {
       console.error(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteGoal = async (id: string) => {
+    if (confirm('Are you sure you want to delete this goal?')) {
+      try {
+        const response = await fetch(`/api/goals/${id}`, { method: 'DELETE' });
+        const result = await response.json();
+        if (result.success) fetchData();
+        else alert('Failed to delete goal: ' + (result.error || 'Unknown error'));
+      } catch (error: any) {
+        alert('Error deleting goal: ' + error.message);
+      }
+    }
+  };
+
+  const handleDeleteTransaction = async (id: string) => {
+    if (confirm('Are you sure you want to delete this transaction?')) {
+      try {
+        const response = await fetch(`/api/transactions/${id}`, { method: 'DELETE' });
+        const result = await response.json();
+        if (result.success) fetchData();
+        else alert('Failed to delete transaction: ' + (result.error || 'Unknown error'));
+      } catch (error: any) {
+        alert('Error deleting transaction: ' + error.message);
+      }
     }
   };
 
@@ -236,10 +265,21 @@ export default function Dashboard() {
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className={`font-black text-base ${tx.type === 'income' ? 'text-emerald-400' : 'text-slate-300'}`}>
-                        {tx.type === 'income' ? '+' : '−'}{formatCurrency(tx.amount)}
-                      </p>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className={`font-black text-base ${tx.type === 'income' ? 'text-emerald-400' : 'text-slate-300'}`}>
+                          {tx.type === 'income' ? '+' : '−'}{formatCurrency(tx.amount)}
+                        </p>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteTransaction(tx.id);
+                        }}
+                        className="p-2 rounded-xl bg-white/5 border border-red-500/10 opacity-0 group-hover:opacity-100 hover:bg-red-500/10 hover:border-red-500/20 text-slate-400 hover:text-red-400 transition-all"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -285,7 +325,7 @@ export default function Dashboard() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {goals.slice(0, 3).map((goal: any, idx: number) => (
-              <GoalCard key={goal.id} goal={goal} feasibility={goalFeasibilities[idx]} />
+              <GoalCard key={goal.id} goal={goal} feasibility={goalFeasibilities[idx]} onDelete={handleDeleteGoal} />
             ))}
             <Link href="/goals" className="border-2 border-dashed border-white/5 rounded-[2rem] p-8 flex flex-col items-center justify-center gap-4 hover:border-emerald-500/20 hover:bg-white/5 transition-all group">
               <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-slate-500 group-hover:text-emerald-400 transition-colors">

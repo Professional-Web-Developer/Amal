@@ -6,7 +6,6 @@ import Button from '@/frontend/elements/buttons/Button';
 import Input from '@/frontend/elements/inputs/Input';
 import AssetLiabilityCard from '@/frontend/components/finance/AssetLiabilityCard';
 import AddLiabilityModal from '@/frontend/components/modals/AddLiabilityModal';
-import { getLiabilities } from '@/app/actions/liabilities';
 import { Liability } from '@/types/finance';
 import { formatCurrencyFull } from '@/lib/financeEngine';
 
@@ -19,14 +18,36 @@ export default function LiabilitiesPage() {
 
     const fetchData = async () => {
         setLoading(true);
-        const data = await getLiabilities();
-        setLiabilities(data);
-        setLoading(false);
+        try {
+            const response = await fetch('/api/liabilities');
+            const result = await response.json();
+            if (result.success) {
+                setLiabilities(result.data);
+            }
+        } catch (error) {
+            console.error('Error fetching liabilities:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleEdit = (liability: any) => {
         setEditingLiability(liability);
         setIsModalOpen(true);
+    };
+
+    const handleDelete = async (id: string) => {
+        try {
+            const response = await fetch(`/api/liabilities/${id}`, { method: 'DELETE' });
+            const result = await response.json();
+            if (result.success) {
+                fetchData();
+            } else {
+                alert('Failed to delete liability: ' + (result.error || 'Unknown error'));
+            }
+        } catch (error: any) {
+            alert('Error deleting liability: ' + error.message);
+        }
     };
 
     const handleOpenAdd = () => {
@@ -120,6 +141,7 @@ export default function LiabilitiesPage() {
                                 item={liability}
                                 type="liability"
                                 onEdit={handleEdit}
+                                onDelete={handleDelete}
                             />
                         ))}
                     </div>

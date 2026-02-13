@@ -2,16 +2,17 @@
 
 import React from 'react';
 import { FinancialGoal, GoalFeasibility } from '@/types/finance';
-import { Target, Calendar, ArrowRight, TrendingUp, AlertCircle, Edit2 } from 'lucide-react';
+import { Target, Calendar, ArrowRight, TrendingUp, AlertCircle, Edit2, Trash2 } from 'lucide-react';
 import { formatCurrencyFull } from '@/lib/financeEngine';
 
 interface GoalCardProps {
     goal: FinancialGoal;
     feasibility?: GoalFeasibility;
     onEdit?: (goal: FinancialGoal) => void;
+    onDelete?: (id: string) => void;
 }
 
-export default function GoalCard({ goal, feasibility, onEdit }: GoalCardProps) {
+export default function GoalCard({ goal, feasibility, onEdit, onDelete }: GoalCardProps) {
     const { goal_name, target_amount, current_saved, target_date, goal_category } = goal;
     const progress = Math.min(100, (current_saved / target_amount) * 100);
 
@@ -28,14 +29,28 @@ export default function GoalCard({ goal, feasibility, onEdit }: GoalCardProps) {
                             <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{goal_category.replace('_', ' ')}</span>
                         </div>
                     </div>
-                    {onEdit && (
-                        <button
-                            onClick={() => onEdit(goal)}
-                            className="p-2 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 text-slate-400 hover:text-white transition-all"
-                        >
-                            <Edit2 className="w-4 h-4" />
-                        </button>
-                    )}
+                    <div className="flex gap-2">
+                        {onEdit && (
+                            <button
+                                onClick={() => onEdit(goal)}
+                                className="p-2 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 text-slate-400 hover:text-white transition-all"
+                            >
+                                <Edit2 className="w-4 h-4" />
+                            </button>
+                        )}
+                        {onDelete && (
+                            <button
+                                onClick={() => {
+                                    if (confirm('Are you sure you want to delete this goal?')) {
+                                        onDelete(goal.id.toString());
+                                    }
+                                }}
+                                className="p-2 rounded-xl bg-white/5 border border-red-500/10 hover:bg-red-500/10 hover:border-red-500/20 text-slate-400 hover:text-red-400 transition-all"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 <div className="space-y-4">

@@ -5,7 +5,6 @@ import { Plus, Wallet, ShieldCheck, PieChart, Landmark, ArrowUpRight } from 'luc
 import Button from '@/frontend/elements/buttons/Button';
 import AccountCard, { AccountType } from '@/frontend/components/cards/AccountCard';
 import AddAccountModal from '@/frontend/components/modals/AddAccountModal';
-import { getAccounts } from '@/app/actions/accounts';
 
 export default function AccountsPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -14,9 +13,17 @@ export default function AccountsPage() {
 
     const fetchAccounts = async () => {
         setLoading(true);
-        const data = await getAccounts();
-        setAccounts(data);
-        setLoading(false);
+        try {
+            const response = await fetch('/api/accounts');
+            const result = await response.json();
+            if (result.success) {
+                setAccounts(result.data);
+            }
+        } catch (error) {
+            console.error('Error fetching accounts:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {

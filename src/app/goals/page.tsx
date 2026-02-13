@@ -6,8 +6,6 @@ import Button from '@/frontend/elements/buttons/Button';
 import Input from '@/frontend/elements/inputs/Input';
 import GoalCard from '@/frontend/components/finance/GoalCard';
 import AddGoalModal from '@/frontend/components/modals/AddGoalModal';
-import { getGoals } from '@/app/actions/goals';
-import { getComprehensiveFinanceData } from '@/app/actions/finance';
 import { FinancialGoal, GoalFeasibility } from '@/types/finance';
 
 export default function GoalsPage() {
@@ -19,15 +17,37 @@ export default function GoalsPage() {
 
     const fetchData = async () => {
         setLoading(true);
-        const data = await getComprehensiveFinanceData();
-        setGoals(data.goals);
-        setFeasibilities(data.goalFeasibilities);
-        setLoading(false);
+        try {
+            const response = await fetch('/api/finance');
+            const result = await response.json();
+            if (result.success) {
+                setGoals(result.data.goals);
+                setFeasibilities(result.data.goalFeasibilities);
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleEdit = (goal: any) => {
         setEditingGoal(goal);
         setIsModalOpen(true);
+    };
+
+    const handleDelete = async (id: string) => {
+        try {
+            const response = await fetch(`/api/goals/${id}`, { method: 'DELETE' });
+            const result = await response.json();
+            if (result.success) {
+                fetchData();
+            } else {
+                alert('Failed to delete goal: ' + (result.error || 'Unknown error'));
+            }
+        } catch (error: any) {
+            alert('Error deleting goal: ' + error.message);
+        }
     };
 
     const handleOpenAdd = () => {
@@ -84,6 +104,7 @@ export default function GoalsPage() {
                                     goal={goal}
                                     feasibility={feasibilities.find(f => f.goalId === goal.id)}
                                     onEdit={handleEdit}
+                                    onDelete={handleDelete}
                                 />
                             ))}
                         </div>
@@ -100,6 +121,7 @@ export default function GoalsPage() {
                                             key={goal.id}
                                             goal={goal}
                                             onEdit={handleEdit}
+                                            onDelete={handleDelete}
                                         />
                                     ))}
                                 </div>

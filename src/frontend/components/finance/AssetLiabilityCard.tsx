@@ -2,16 +2,17 @@
 
 import React from 'react';
 import { Asset, Liability } from '@/types/finance';
-import { Wallet, Landmark, TrendingUp, TrendingDown, Calendar, Percent, Edit2 } from 'lucide-react';
+import { Wallet, Landmark, TrendingUp, TrendingDown, Calendar, Percent, Edit2, Trash2 } from 'lucide-react';
 import { formatCurrencyFull } from '@/lib/financeEngine';
 
 interface AssetLiabilityCardProps {
     item: Asset | Liability;
     type: 'asset' | 'liability';
     onEdit?: (item: Asset | Liability) => void;
+    onDelete?: (id: string) => void;
 }
 
-export default function AssetLiabilityCard({ item, type, onEdit }: AssetLiabilityCardProps) {
+export default function AssetLiabilityCard({ item, type, onEdit, onDelete }: AssetLiabilityCardProps) {
     const isAsset = type === 'asset';
     const asset = item as Asset;
     const liability = item as Liability;
@@ -34,14 +35,28 @@ export default function AssetLiabilityCard({ item, type, onEdit }: AssetLiabilit
                             </span>
                         </div>
                     </div>
-                    {onEdit && (
-                        <button
-                            onClick={() => onEdit(item)}
-                            className="p-2 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 text-slate-400 hover:text-white transition-all"
-                        >
-                            <Edit2 className="w-4 h-4" />
-                        </button>
-                    )}
+                    <div className="flex gap-2">
+                        {onEdit && (
+                            <button
+                                onClick={() => onEdit(item)}
+                                className="p-2 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 text-slate-400 hover:text-white transition-all"
+                            >
+                                <Edit2 className="w-4 h-4" />
+                            </button>
+                        )}
+                        {onDelete && (
+                            <button
+                                onClick={() => {
+                                    if (confirm(`Are you sure you want to delete this ${type}?`)) {
+                                        onDelete(item.id.toString());
+                                    }
+                                }}
+                                className="p-2 rounded-xl bg-white/5 border border-red-500/10 hover:bg-red-500/10 hover:border-red-500/20 text-slate-400 hover:text-red-400 transition-all"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 <div className="space-y-4">

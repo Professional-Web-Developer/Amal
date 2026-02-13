@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import Button from '@/frontend/elements/buttons/Button';
 import Input from '@/frontend/elements/inputs/Input';
 import AmalLogo from '@/frontend/components/brand/AmalLogo';
-import { login, signup } from '@/app/actions/auth';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -27,23 +26,41 @@ export default function LoginPage() {
         setError(null);
 
         const formData = new FormData(e.currentTarget);
+        const email = formData.get('email') as string;
+        const password = formData.get('password') as string;
 
-        if (isLogin) {
-            const result = await login(formData);
-            if (result?.error) {
-                setError(result.error);
-                setLoading(false);
-            }
-        } else {
-            const result = await signup(formData);
-            if (result?.error) {
-                setError(result.error);
-                setLoading(false);
+        try {
+            if (isLogin) {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    router.push('/');
+                    router.refresh();
+                } else {
+                    setError(result.error);
+                }
             } else {
-                setError("Check your email for confirmation!");
-                setLoading(false);
-                setIsLogin(true);
+                const response = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    setError("Check your email for confirmation!");
+                    setIsLogin(true);
+                } else {
+                    setError(result.error);
+                }
             }
+        } catch (error: any) {
+            setError(error.message);
+        } finally {
+            setLoading(false);
         }
     }
 

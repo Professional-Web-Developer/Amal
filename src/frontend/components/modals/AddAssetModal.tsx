@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { X, Type, Tag, Calendar, Database, FileText, Repeat } from 'lucide-react';
 import Button from '@/frontend/elements/buttons/Button';
 import Input from '@/frontend/elements/inputs/Input';
-import { createAsset, updateAsset } from '@/app/actions/assets';
 import { Asset, AssetType } from '@/types/finance';
 
 interface AddAssetModalProps {
@@ -83,9 +82,19 @@ export default function AddAssetModal({ isOpen, onClose, initialData }: AddAsset
                 notes: formData.notes,
             };
 
-            const result = initialData
-                ? await updateAsset(initialData.id, data)
-                : await createAsset(data);
+            const response = initialData
+                ? await fetch(`/api/assets/${initialData.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                })
+                : await fetch('/api/assets', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+            const result = await response.json();
 
             if (result.success) {
                 handleClose();

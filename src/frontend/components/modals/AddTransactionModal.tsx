@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { X, DollarSign, Tag, Calendar, Type } from 'lucide-react';
 import Button from '@/frontend/elements/buttons/Button';
 import Input from '@/frontend/elements/inputs/Input';
-import { createTransaction } from '@/app/actions/transactions';
 
 interface AddTransactionModalProps {
     isOpen: boolean;
@@ -29,14 +28,19 @@ export default function AddTransactionModal({ isOpen, onClose }: AddTransactionM
         setLoading(true);
 
         try {
-            const result = await createTransaction({
-                name: formData.name,
-                amount: parseFloat(formData.amount) || 0,
-                category: formData.category,
-                type: formData.type,
-                date: formData.date,
-                is_recurring: formData.is_recurring
+            const response = await fetch('/api/transactions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: formData.name,
+                    amount: parseFloat(formData.amount) || 0,
+                    category: formData.category,
+                    type: formData.type,
+                    date: formData.date,
+                    is_recurring: formData.is_recurring
+                })
             });
+            const result = await response.json();
 
             if (result.success) {
                 setFormData({

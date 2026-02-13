@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Badge from '@/frontend/elements/badges/Badge';
-import { MoreVertical, Sparkles, Repeat } from 'lucide-react';
+import { MoreVertical, Sparkles, Repeat, Trash2 } from 'lucide-react';
 
 export interface Transaction {
     id: string | number;
@@ -18,9 +18,10 @@ export interface Transaction {
 
 interface TransactionTableProps {
     transactions: Transaction[];
+    onDelete?: (id: string) => void;
 }
 
-export default function TransactionTable({ transactions }: TransactionTableProps) {
+export default function TransactionTable({ transactions, onDelete }: TransactionTableProps) {
     return (
         <div className="glass-card rounded-[2.5rem] overflow-hidden mac-shadow">
             <div className="overflow-x-auto">
@@ -84,9 +85,23 @@ export default function TransactionTable({ transactions }: TransactionTableProps
                                     </div>
                                 </td>
                                 <td className="px-8 py-5 text-right">
-                                    <button className="p-3 text-[#86868b] hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-all active:scale-95">
-                                        <MoreVertical className="w-4 h-4" />
-                                    </button>
+                                    <div className="flex items-center justify-end gap-2">
+                                        <button className="p-3 text-[#86868b] hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-all active:scale-95">
+                                            <MoreVertical className="w-4 h-4" />
+                                        </button>
+                                        {onDelete && (
+                                            <button
+                                                onClick={() => {
+                                                    if (confirm('Are you sure you want to delete this transaction?')) {
+                                                        onDelete(tx.id.toString());
+                                                    }
+                                                }}
+                                                className="p-3 text-red-500/50 hover:text-red-500 hover:bg-red-500/5 rounded-xl transition-all active:scale-95"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                    </div>
                                 </td>
                             </tr>
                         ))}

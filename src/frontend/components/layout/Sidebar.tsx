@@ -21,7 +21,6 @@ import { usePathname } from 'next/navigation';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import AmalLogo from '@/frontend/components/brand/AmalLogo';
-import { logout } from '@/app/actions/auth';
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -47,7 +46,15 @@ export default function Sidebar() {
     if (pathname === '/login') return null;
 
     async function handleLogout() {
-        await logout();
+        try {
+            const response = await fetch('/api/auth/logout', { method: 'POST' });
+            const result = await response.json();
+            if (result.success) {
+                window.location.href = '/login';
+            }
+        } catch (error) {
+            console.error('Logout failed:', error);
+        }
     }
 
     return (

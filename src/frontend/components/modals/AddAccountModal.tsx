@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { X, Building2, CreditCard, Wallet, Landmark } from 'lucide-react';
 import Button from '@/frontend/elements/buttons/Button';
 import Input from '@/frontend/elements/inputs/Input';
-import { createAccount } from '@/app/actions/accounts';
 
 interface AddAccountModalProps {
     isOpen: boolean;
@@ -27,12 +26,17 @@ export default function AddAccountModal({ isOpen, onClose }: AddAccountModalProp
         setLoading(true);
 
         try {
-            const result = await createAccount({
-                name: formData.name,
-                type: formData.type,
-                balance: parseFloat(formData.balance) || 0,
-                bank_name: formData.bank_name,
+            const response = await fetch('/api/accounts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: formData.name,
+                    type: formData.type,
+                    balance: parseFloat(formData.balance) || 0,
+                    bank_name: formData.bank_name,
+                })
             });
+            const result = await response.json();
 
             if (result.success) {
                 setFormData({ name: '', type: 'bank', balance: '', bank_name: '' });

@@ -3,7 +3,6 @@
 import React from 'react';
 import { Sparkles, TrendingUp, Info } from 'lucide-react';
 import WealthProjector from '@/frontend/components/finance/WealthProjector';
-import { getComprehensiveFinanceData } from '@/app/actions/finance';
 
 export default function ProjectionsPage() {
     const [data, setData] = React.useState<any>(null);
@@ -12,8 +11,11 @@ export default function ProjectionsPage() {
     React.useEffect(() => {
         const fetchData = async () => {
             try {
-                const result = await getComprehensiveFinanceData();
-                setData(result);
+                const response = await fetch('/api/finance');
+                const result = await response.json();
+                if (result.success) {
+                    setData(result.data);
+                }
             } catch (error) {
                 console.error(error);
             } finally {
